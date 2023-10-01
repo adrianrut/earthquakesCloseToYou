@@ -49,8 +49,9 @@ public class MapService {
         GoogleMapsResponseDto response = restTemplate.getForObject(url, GoogleMapsResponseDto.class);
         assert response != null;
         Result result = response.getResult();
-        location.setLat(result.getGeometry().getLocation().getLat());
-        location.setLon(result.getGeometry().getLocation().getLng());
+        location.setX(result.getGeometry().getLocation().getLat());
+        location.setY(result.getGeometry().getLocation().getLng());
+        location.setTitle(city.toUpperCase());
         return location;
     }
 }

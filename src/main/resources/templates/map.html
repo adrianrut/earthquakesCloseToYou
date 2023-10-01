@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+          rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+          crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
+        #map {
+            height: 1080px;
+        }
+
+    </style>
+
+    <title>Earthquakes close to you</title>
+</head>
+<body>
+
+
+<div id="map">
+    <script th:inline="javascript">
+
+        /*<![CDATA[*/
+        const city = [[${city}]];
+
+        const map = L.map('map').setView([city.x, city.y], 8);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const point = [[${points}]];
+
+
+        point.forEach(value => {
+            const popup = L.popup()
+                .setLatLng([value.lon, value.lat])
+                .setContent(value.title + ' ' + value.distanceBetween + 'km')
+                .openOn(map);
+            L.marker([value.lon, value.lat]).addTo(map)
+                .bindPopup(popup)
+                .openPopup();
+            L.marker([city.x, city.y]).addTo(map)
+                .bindPopup(city.title)
+                .openPopup();
+            L.polygon([
+                [city.x, city.y],
+                [value.lon, value.lat],
+            ]).addTo(map);
+
+        })
+        /*]]>*/
+
+    </script>
+
+</div>
+</body>
+</html>

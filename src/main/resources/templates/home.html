@@ -18,8 +18,8 @@
 <body>
 <h1>Trzęsienia ziemi najbliżej Ciebie w ostatnich 24 godzinach</h1>
 
-<ul th:each="city: ${earthquakeList}">
-  <li th:text="${city.toString()} +km"></li>
+<ul th:each="place: ${earthquakeSet}">
+  <li th:text="${place.title} + ' ' + ${place.distanceBetween} +km"></li>
 </ul>
 <a href="/">Powrót do strony głównej</a>
 

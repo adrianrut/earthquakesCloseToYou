@@ -6,35 +6,51 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import pl.rutkowski.earthquakesclosetoyou.City;
+import pl.rutkowski.earthquakesclosetoyou.MapService;
+import pl.rutkowski.earthquakesclosetoyou.model.Point;
 
-import java.util.List;
+import java.util.Set;
 
 @Controller
 public class EarthquakeController {
 
     private final EarthquakeService earthquakeService;
+    private final MapService mapService;
 
-    public EarthquakeController(EarthquakeService earthquakeService) {
+    public EarthquakeController(EarthquakeService earthquakeService, MapService mapService) {
         this.earthquakeService = earthquakeService;
+        this.mapService = mapService;
     }
 
     @GetMapping("/earthquakes={city}")
     public String findEarthquakes(@PathVariable String city, Model model) {
-        List<EarthquakeLocation> earthquakeLocations = earthquakeService.sortEarthquakesList(city);
-        model.addAttribute("earthquakeList", earthquakeLocations);
+        Set<Point> earthquakeLocations = earthquakeService.sortEarthquakesSet(city);
+        model.addAttribute("earthquakeSet", earthquakeLocations);
         return "home";
     }
 
     @GetMapping("/")
-    public String home(Model model) {
+    public String homeForMap(Model model) {
         model.addAttribute("city", new City());
         return "findCity";
     }
 
-    @PostMapping("/city")
-    public String getCity(City city) {
+    @PostMapping(value = "/city", params = "map")
+    public String getCityForMap(City city) {
+        return "redirect:/map=" + city.getName().toLowerCase();
+    }
+
+    @PostMapping(value = "/city", params = "list")
+    public String getCityForList(City city) {
         return "redirect:/earthquakes=" + city.getName().toLowerCase();
     }
 
+    @GetMapping("/map={city}")
+    public String getMap(Model model, @PathVariable String city) {
+        Set<Point> points = earthquakeService.sortEarthquakesSet(city);
+        model.addAttribute("points", points);
+        model.addAttribute("city", mapService.getLocation(city));
+        return "map";
+    }
 
 }

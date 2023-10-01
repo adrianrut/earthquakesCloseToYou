@@ -4,12 +4,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pl.rutkowski.earthquakesclosetoyou.LocationDetails;
 import pl.rutkowski.earthquakesclosetoyou.MapService;
+import pl.rutkowski.earthquakesclosetoyou.model.Point;
 import pl.rutkowski.earthquakesclosetoyou.model.earthquakeApi.EarthquakeResponseDto;
 import pl.rutkowski.earthquakesclosetoyou.model.earthquakeApi.Feature;
 import pl.rutkowski.earthquakesclosetoyou.model.earthquakeApi.Geometry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,8 +25,8 @@ public class EarthquakeService {
         this.mapService = mapService;
     }
 
-    public List<EarthquakeLocation> getEarthquakesDetails(String city) {
-        List<EarthquakeLocation> earthquakeLocationList = new ArrayList<>();
+    public List<Point> getEarthquakesDetails(String city) {
+        List<Point> earthquakeLocationList = new ArrayList<>();
         LocationDetails location = mapService.getLocation(city);
 
         RestTemplate restTemplate = new RestTemplate();
@@ -38,21 +40,21 @@ public class EarthquakeService {
 
             String title = feature.getProperties().getTitle();
             int distance = (int) distanceCalculator.distanceCalculate
-                    (location.getLat(), eqLat, location.getLon(), eqLon);
+                    (location.getX(), eqLat, location.getY(), eqLon);
 
-            EarthquakeLocation earthquakeLocation = new EarthquakeLocation(title, distance);
-            earthquakeLocationList.add(earthquakeLocation);
+            Point point = new Point(eqLon, eqLat, title, distance);
+
+
+            earthquakeLocationList.add(point);
         }
 
-        return earthquakeLocationList;
+        return earthquakeLocationList.stream().sorted().toList();
     }
 
-
-
-    public List<EarthquakeLocation> sortEarthquakesList(String city) {
+    public Set<Point> sortEarthquakesSet(String city) {
         return getEarthquakesDetails(city).stream()
                 .sorted()
-                .limit(10)
-                .collect(Collectors.toList());
+                .limit(50)
+                .collect(Collectors.toSet());
         }
 }
